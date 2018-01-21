@@ -2,12 +2,18 @@ const fs = require('fs')
 const express = require('express')
 const path = require('path')
 const steem = require('steem')
+const Crawler = require('es6-crawler-detect/src')
 const app = express()
 const port = process.env.PORT || 3000
 
 steem.api.setOptions({ url: 'https://api.steemit.com' });
 
 app.get('*', function(req, res, next) {
+    var CrawlerDetector = new Crawler(req)
+    if ( CrawlerDetector.isCrawler() )
+    {
+      console.log(CrawlerDetector.getMatches())
+    }
     console.log('New GET!', req.query)
     console.log('User-Agent: ', req.headers['user-agent'])
     if (req.query._escaped_fragment_) {

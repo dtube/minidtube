@@ -21,11 +21,11 @@ app.get('*', function(req, res, next) {
                 if (error(err, next)) return
                 getDTubeHTML(function(err, baseHTML) {
                     if (error(err, next)) return
-                    baseHTML = baseHTML.replace('@@CONTENT@@', contentHTML)
-                    baseHTML = baseHTML.replace('@@TITLE@@', pageTitle)
-                    baseHTML = baseHTML.replace('@@DESCRIPTION@@', description)
-                    baseHTML = baseHTML.replace('@@URL@@', url)
-                    baseHTML = baseHTML.replace('@@SNAP@@', snap)
+                    baseHTML = baseHTML.replace(/@@CONTENT@@/g, contentHTML)
+                    baseHTML = baseHTML.replace(/@@TITLE@@/g, pageTitle)
+                    baseHTML = baseHTML.replace(/@@DESCRIPTION@@/g, description)
+                    baseHTML = baseHTML.replace(/@@URL@@/g, url)
+                    baseHTML = baseHTML.replace(/@@SNAP@@/g, snap)
                     res.send(baseHTML)
                 })
             })

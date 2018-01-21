@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html><head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" class="__meteor-css__" href="/static/merged-stylesheets.css">
+  <title>@@TITLE@@ - DTube</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" type="image/png" href="https://d.tube/DTube_files/images/dtubeplayfavicon.png">
+  <meta name="description" content="DTube, alternative decentralized video platform.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="https://d.tube/DTube_files/images/dtubeplayfavicon.png">
+</head>
+<body class="pushable">
+
+<div id="__blaze-root"><body class="pushable">
+    <div class="ui large borderless main menu fixed" style="height:57px; z-index:9000;">
+    <div class="left floated menu" style="width:60%">
+      <div class="sidebartoggleicon item header" style="cursor: pointer;">
+        <i class="sidebar icon" style="font-size:1.5em; margin:0;"></i>
+      </div>
+      <a href="https://d.tube/" class="blacklogo header item" id="textlogo">
+          <img alt="" style="width:90px;" src="/static/DTube_Black.svg">
+      </a>
+      <a href="https://d.tube/" class="whitelogo header item displaynone" id="textlogo">
+        <img alt="" style="width:90px;" src="/static/DTube_White.svg">
+    </a>
+      <div class="ui item grid tablet only computer" style="width:inherit;">
+        <div class="ui search" style="width:100%">
+          <div class="ui icon input" style="width:100%">
+            <form class="searchForm" style="width:100%">
+              <input id="dsearch" type="text" name="search" placeholder="Search Videos…" autocomplete="off">
+            </form>
+            <i class="search icon"></i>
+          </div>
+          <div class="results" style="display: none;">
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="right floated menu">
+      <a id="mobilesearch" class="ui item grid mobile only" style="margin:0px;padding: 0.92857143em 1.14285714em;">
+        <i class="search icon" style="font-size:1.5em; margin:0;padding:0;"></i>
+      </a>
+      
+      <a class="ui item" href="https://d.tube/login" title="Upload a Video">
+        <i class="cloud upload icon" style="font-size:1.5em; margin:0;"></i>
+      </a>
+       
+      <div class="ui item top right floated dropdown dropdownsettings" style="float: right;" tabindex="0">
+    <i class="settings icon" style="font-size:1.5em; margin:0;"></i>
+    <div id="menu" class="menu" tabindex="-1">
+      <div class="item">
+        <i class="left dropdown icon"></i>
+        <span class="text">Voting @ 100%</span>
+        <div class="left menu" style="min-width: 0px;">
+          <div class="item voteWeight">+10%</div>
+          <div class="item voteWeight">+1%</div>
+          <div class="item voteWeight">-1%</div>
+          <div class="item voteWeight">-10%</div>
+        </div>
+      </div>
+      <div class="item">
+        <i class="left dropdown icon"></i>
+        <span class="text">NSFW Videos</span>
+        <div class="left menu" style="min-width: 0px;">
+          
+            <div class="item nsfwSetting nsfwShow">Show</div>
+          
+          
+            <div class="item nsfwSetting nsfwHide"><strong>Fully Hidden</strong></div>
+          
+        </div>
+      </div>
+      <div class="item nightMode">
+          <i class="adjust icon"></i>
+          <span class="text">Night Mode (Beta)</span>
+      </div>
+      
+      <div class="ui divider"></div>
+      <div class="header">IPFS Settings</div>
+      <div class="item">
+        <i class="left dropdown icon"></i>
+        <span class="text">Local IPFS</span>
+        <div class="left menu" style="min-width: 0px;">
+          <div class="header">
+            
+              <span style="color: red">You are not running IPFS</span>
+            
+          </div>
+
+          
+        </div>
+      </div>
+      <div class="item">
+        <i class="left dropdown icon"></i>
+        <span class="text">Gateway</span>
+        <div class="left menu">
+          
+            <div class="item ipfsGateway automatic"><strong>Automatic</strong></div>
+          
+          
+            
+              <div class="item ipfsGateway">https://ipfs.io</div>
+            
+          
+            
+              <div class="item ipfsGateway">https://dtube1.gateway.ipfsstore.it:8443</div>
+            
+          
+            
+              <div class="item ipfsGateway">https://dtube2.gateway.ipfsstore.it:8443</div>
+            
+          
+            
+              <div class="item ipfsGateway">https://gateway.ipfs.io</div>
+            
+          
+            
+              <div class="item ipfsGateway">https://earth.i.ipfs.io</div>
+            
+          
+            
+              <div class="item ipfsGateway">https://gateway.ipfsstore.it:8443</div>
+            
+          
+            
+              <div class="item ipfsGateway">https://scrappy.i.ipfs.io</div>
+            
+          
+            
+              <div class="item ipfsGateway">https://chappy.i.ipfs.io</div>
+            
+          
+            
+              <div class="item ipfsGateway">http://127.0.0.1:8080</div>
+            
+          
+        </div>
+      </div>
+      <div class="item">
+        <i class="left dropdown icon"></i>
+        <span class="text">API</span>
+        <div class="left menu">
+          
+            
+              <div class="item ipfsUpload">
+                https://gateway.ipfsstore.it:8443
+              </div>
+            
+          
+            
+              <div class="item ipfsUpload">
+                <strong>https://dtube1.gateway.ipfsstore.it:8443</strong>
+              </div>
+            
+          
+            
+              <div class="item ipfsUpload">
+                https://dtube2.gateway.ipfsstore.it:8443
+              </div>
+            
+          
+            
+              <div class="item ipfsUpload">
+                https://127.0.0.1:5001
+              </div>
+            
+          
+        </div>
+      </div>
+      
+    </div>
+  </div> 
+      
+      <a class="ui item">
+        <a href="https://d.tube/login" class="ui labeled small button">
+          <div class="ui labeled small button" tabindex="0">
+              <div class="ui red small left dtube button subscribe">
+                  <i class="sign in icon"></i> Login 
+              </div>
+            </div>
+           </a>
+      </a>
+      
+    </div>
+  </div>
+  <div id="sidebar" class="ui desktop sidebar fixed overlay left vertical inverted labeled icon menu visible animating" style="box-shadow: rgba(34, 36, 38, 0.15) 1px 0px 0px; z-index: 10; top: 57px; background-color: white;">
+    <div style="height:100%;">
+    <a href="https://d.tube/" class="item" id="home" style="padding:0%;">
+      <div id="homesidebarmenu" class="menuitem dtubesidebarmenu" style="padding:0%; display: inherit;">
+        <i class="home icon dtubesidebaricon"></i>
+        <span class="dtubesidebartitle">Home</span>
+      </div>
+    </a>
+    <a href="https://d.tube/c/" class="item" style="padding:0%;">
+      <div id="channelsidebarmenu" class="menuitem dtubesidebarmenu" style="padding:0%; display: inherit;">
+        <i class="grid layout icon dtubesidebaricon"></i>
+        <span class="dtubesidebartitle">My Channel</span>
+      </div>
+    </a>
+    <a href="https://d.tube/newupload" class="item" style="padding:0%;">
+      <div id="uploadsidebarmenu" class="menuitem dtubesidebarmenu" style="padding:0%; display: inherit;">
+        <i class="cloud upload icon dtubesidebaricon"></i>
+        <span class="dtubesidebartitle">Upload</span>
+      </div>
+    </a>
+    <a href="https://d.tube/hotvideos" class="item" style="padding:0%;">
+      <div id="hotsidebarmenu" class="menuitem dtubesidebarmenu" style="padding:0%; display: inherit;">
+        <i class="fire icon dtubesidebaricon"></i>
+        <span class="dtubesidebartitle">Hot Videos</span>
+      </div>
+    </a>
+    <a href="https://d.tube/trendingvideos" class="item" style="padding:0%;">
+      <div id="trendingsidebarmenu" class="menuitem dtubesidebarmenu" style="padding:0%; display: inherit;">
+        <i class="trophy icon dtubesidebaricon"></i>
+        <span class="dtubesidebartitle">Trending Videos</span>
+      </div>
+    </a>
+    <a href="https://d.tube/newvideos" class="item" style="padding:0%;">
+      <div id="newsidebarmenu" class="menuitem dtubesidebarmenu" style="padding:0%; display: inherit;">
+          <i class="hourglass start icon dtubesidebaricon"></i>
+        <span class="dtubesidebartitle">New Videos</span>
+      </div>
+    </a>
+    <a href="https://d.tube/watchlater" class="item" style="padding:0%;">
+      <div id="watchlatersidebarmenu" class="menuitem dtubesidebarmenu" style="padding:0%; display: inherit;">
+        <i class="time icon dtubesidebaricon"></i>
+        <span class="dtubesidebartitle">Watch Later</span>
+      </div>
+    </a>
+  <a href="https://d.tube/history" class="item" style="padding:0%;">
+    <div id="watchagainsidebarmenu" class="menuitem dtubesidebarmenu" style="padding:0%;">
+      <i class="history icon dtubesidebaricon"></i>
+      <span class="dtubesidebartitle">Watch Again</span>
+    </div>
+  </a>
+    <div class="ui divider"></div>
+    
+    <div class="menuitem dtubesidebarmenu" style="padding:0%;">
+      <i class="smile icon dtubesidebaricon"></i>
+      <span class="dtubesidebartitle">No suscribes to display</span>
+    </div>
+    
+    <div class="ui divider"></div>
+    
+    <div class="item sidebarlink" style="position: absolute; bottom: 56px; color: red; background: white; padding: 10px; font-weight: 600; font-size: 13px; line-height: 1.5em;">
+      <a href="https://about.d.tube/" target="_blank" id="about">
+          <span class="sidebarlink">About</span>
+      </a>-
+      <a href="https://about.d.tube/#faq1" target="_blank" id="help">
+          <span class="sidebarlink">Help</span>
+        </a>-
+        <a href="https://github.com/dtube" target="_blank" id="github">
+         <span class="sidebarlink">Github</span>
+        </a>-
+          <a href="https://steemit.com/@dtube" target="_blank" id="steemit">
+            <span class="sidebarlink">Steemit</span>
+          </a>-
+          <a href="https://discord.gg/RqeQQjf" target="_blank" id="discord">
+            <span class="sidebarlink">Discord</span>
+          </a>
+    </div>
+    
+  </div>
+  </div>
+  
+  <div class="pusher">
+    <div class="article mainsided">
+      
+      <main class="ui maingrid container content">
+        
+        @@CONTENT@@
+
+      </main>
+      
+    </div>
+  </div>
+</body></div></body></html>

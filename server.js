@@ -14,12 +14,13 @@ app.get('*', function(req, res, next) {
         var path = req.query._escaped_fragment_
         console.log(path)
         if (path.startsWith('/v/')) {
-            getVideoHTML(path.split('/')[2], path.split('/')[3], function(err, contentHTML, pageTitle) {
+            getVideoHTML(path.split('/')[2], path.split('/')[3], function(err, contentHTML, pageTitle, description) {
                 if (error(err, next)) return
                 getDTubeHTML(function(err, baseHTML) {
                     if (error(err, next)) return
                     baseHTML = baseHTML.replace('@@CONTENT@@', contentHTML)
                     baseHTML = baseHTML.replace('@@TITLE@@', pageTitle)
+                    baseHTML = baseHTML.replace('@@DESCRIPTION@@', description)
                     res.send(baseHTML)
                 })
             })
@@ -85,7 +86,8 @@ function getVideoHTML(author, permlink, cb) {
             html += downvotedBy.join(', ')
             html += '</p>'
         }
-        cb(null, html, video.info.title)
+        var description = video.content.description.replace(/(?:\r\n|\r|\n)/g, ' ').substr(0, 300)
+        cb(null, html, video.info.title, description)
     })
 }
 

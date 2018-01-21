@@ -22,7 +22,7 @@ app.get('*', function(req, res, next) {
             getVideoHTML(
             path.split('/')[2],
             path.split('/')[3],
-            function(err, contentHTML, pageTitle, description, url, snap, urlvideo) {
+            function(err, contentHTML, pageTitle, description, url, snap, urlvideo, duration) {
                 if (error(err, next)) return
                 getDTubeHTML(function(err, baseHTML) {
                     if (error(err, next)) return
@@ -32,6 +32,14 @@ app.get('*', function(req, res, next) {
                     baseHTML = baseHTML.replace(/@@URL@@/g, url)
                     baseHTML = baseHTML.replace(/@@SNAP@@/g, snap)
                     baseHTML = baseHTML.replace(/@@VIDEO@@/g, urlvideo)
+                    if (duration) {
+                        var durationHTML = '<meta property="og:video:duration" content="@@VIDEODURATION@@" />'
+                        durationHTML = durationHTML.replace(/@@VIDEODURATION@@/g, duration)
+                        baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, durationHTML)
+                    } else {
+                        baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, '')
+                    }
+                    
                     res.send(baseHTML)
                 })
             })
@@ -101,6 +109,7 @@ function getVideoHTML(author, permlink, cb) {
         var url = 'https://obscure-headland-27356.herokuapp.com/#!/v/'+video.info.author+'/'+video.info.permlink
         var snap = 'https://ipfs.io/ipfs/'+video.info.snaphash
         var urlVideo = 'https://ipfs.io/ipfs'+hashVideo
+        var duration = video.info.duration || null
         var description = video.content.description.replace(/(?:\r\n|\r|\n)/g, ' ').substr(0, 300)
         cb(null, html, video.info.title, description, url, snap, urlVideo)
     })

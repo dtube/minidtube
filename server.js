@@ -3,7 +3,7 @@ const express = require('express')
 const path = require('path')
 const steem = require('steem')
 const app = express()
-const port = 3030
+const port = process.env.PORT || 3000
 
 steem.api.setOptions({ url: 'https://api.steemit.com' });
 

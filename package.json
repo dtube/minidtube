@@ -13,6 +13,7 @@
   "author": "Adrien M",
   "license": "ISC",
   "dependencies": {
+    "es6-crawler-detect": "^1.1.1",
     "express": "^4.16.2",
     "path": "^0.12.7",
     "steem": "^0.6.7"

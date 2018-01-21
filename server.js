@@ -2,6 +2,7 @@ const fs = require('fs')
 const express = require('express')
 const path = require('path')
 const steem = require('steem')
+const htmlEncode = require('htmlencode').htmlEncode;
 const app = express()
 const port = process.env.PORT || 3000
 var jsonfile = require('jsonfile')
@@ -12,38 +13,41 @@ steem.api.setOptions({ url: 'https://api.steemit.com' });
 
 app.get('*', function(req, res, next) {
     var isRobot = getRobotName(req.headers['user-agent'])
-    console.log('New GET!', req.query)
-    console.log('User-Agent: ', req.headers['user-agent'])
+    console.log('GET', req.path, req.query)
     console.log('Robot: ', isRobot)
-    if (req.query._escaped_fragment_ && isRobot) {
-        var path = req.query._escaped_fragment_
-        console.log(path)
-        if (path.startsWith('/v/')) {
-            getVideoHTML(
-            path.split('/')[2],
-            path.split('/')[3],
-            function(err, contentHTML, pageTitle, description, url, snap, urlvideo, duration) {
+    if (!isRobot) next()
+
+    var path = null
+    if (req.query._escaped_fragment_)
+        path = req.query._escaped_fragment_
+    else
+        path = req.path
+
+    if (path.startsWith('/v/')) {
+        getVideoHTML(
+        path.split('/')[2],
+        path.split('/')[3],
+        function(err, contentHTML, pageTitle, description, url, snap, urlvideo, duration) {
+            if (error(err, next)) return
+            getDTubeHTML(function(err, baseHTML) {
                 if (error(err, next)) return
-                getDTubeHTML(function(err, baseHTML) {
-                    if (error(err, next)) return
-                    baseHTML = baseHTML.replace(/@@CONTENT@@/g, contentHTML)
-                    baseHTML = baseHTML.replace(/@@TITLE@@/g, pageTitle)
-                    baseHTML = baseHTML.replace(/@@DESCRIPTION@@/g, description)
-                    baseHTML = baseHTML.replace(/@@URL@@/g, url)
-                    baseHTML = baseHTML.replace(/@@SNAP@@/g, snap)
-                    baseHTML = baseHTML.replace(/@@VIDEO@@/g, urlvideo)
-                    if (duration) {
-                        var durationHTML = '<meta property="og:video:duration" content="@@VIDEODURATION@@" />'
-                        durationHTML = durationHTML.replace(/@@VIDEODURATION@@/g, duration)
-                        baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, durationHTML)
-                    } else {
-                        baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, '')
-                    }
-                    
-                    res.send(baseHTML)
-                })
+                baseHTML = baseHTML.replace(/@@CONTENT@@/g, contentHTML)
+                baseHTML = baseHTML.replace(/@@TITLE@@/g, htmlEncode(pageTitle))
+                baseHTML = baseHTML.replace(/@@DESCRIPTION@@/g, htmlEncode(description))
+                baseHTML = baseHTML.replace(/@@URL@@/g, htmlEncode(url))
+                baseHTML = baseHTML.replace(/@@SNAP@@/g, htmlEncode(snap))
+                baseHTML = baseHTML.replace(/@@VIDEO@@/g, htmlEncode(urlvideo))
+                if (duration) {
+                    var durationHTML = '<meta property="og:video:duration" content="@@VIDEODURATION@@" />'
+                    durationHTML = durationHTML.replace(/@@VIDEODURATION@@/g, htmlEncode(duration))
+                    baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, durationHTML)
+                } else {
+                    baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, '')
+                }
+                
+                res.send(baseHTML)
             })
-        }
+        })
     } else {
         next()
     }

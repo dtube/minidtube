@@ -4,12 +4,16 @@ const path = require('path')
 const steem = require('steem')
 const app = express()
 const port = process.env.PORT || 3000
+var jsonfile = require('jsonfile')
+var file = 'robots.json'
+var crawlers = jsonfile.readFileSync(file)
 
 steem.api.setOptions({ url: 'https://api.steemit.com' });
 
 app.get('*', function(req, res, next) {
     console.log('New GET!', req.query)
     console.log('User-Agent: ', req.headers['user-agent'])
+    console.log('Robot: ', getRobotName(req.headers['user-agent']))
     if (req.query._escaped_fragment_) {
         var path = req.query._escaped_fragment_
         console.log(path)
@@ -115,4 +119,13 @@ function parseVideo(video, isComment) {
     newVideo.net_rshares = video.net_rshares
     newVideo.reblogged_by = video.reblogged_by
     return newVideo;
-  }
+}
+
+function getRobotName(userAgent) {
+    for (let i = 0; i < crawlers.length; i++) {
+        var re = new RegExp("^("+crawlers[i].pattern+")$");
+        var isRobot = re.test(userAgent)
+        if (isRobot) console.log(crawlers[i].pattern)
+    }
+    return;
+}

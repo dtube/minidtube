@@ -125,7 +125,7 @@ function getRobotName(userAgent) {
     for (let i = 0; i < crawlers.length; i++) {
         var re = new RegExp(crawlers[i].pattern);
         var isRobot = re.test(userAgent)
-        if (isRobot) console.log(crawlers[i].pattern)
+        if (isRobot) return crawlers[i].pattern;
     }
     return;
 }

@@ -11,10 +11,11 @@ var crawlers = jsonfile.readFileSync(file)
 steem.api.setOptions({ url: 'https://api.steemit.com' });
 
 app.get('*', function(req, res, next) {
+    var isRobot = getRobotName(req.headers['user-agent'])
     console.log('New GET!', req.query)
     console.log('User-Agent: ', req.headers['user-agent'])
-    console.log('Robot: ', getRobotName(req.headers['user-agent']))
-    if (req.query._escaped_fragment_) {
+    console.log('Robot: ', isRobot)
+    if (req.query._escaped_fragment_ && isRobot) {
         var path = req.query._escaped_fragment_
         console.log(path)
         if (path.startsWith('/v/')) {

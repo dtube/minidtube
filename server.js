@@ -92,7 +92,7 @@ function getVideoHTML(author, permlink, cb) {
             html += '</p>'
         }
         
-        var url = 'https://d.tube/#!/v/'+video.info.author+'/'+video.info.permlink
+        var url = 'https://obscure-headland-27356.herokuapp.com/#!/v/'+video.info.author+'/'+video.info.permlink
         var snap = 'https://ipfs.io/ipfs/'+video.info.snaphash
         var description = video.content.description.replace(/(?:\r\n|\r|\n)/g, ' ').substr(0, 300)
         cb(null, html, video.info.title, description, url, snap)

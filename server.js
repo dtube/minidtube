@@ -14,13 +14,18 @@ app.get('*', function(req, res, next) {
         var path = req.query._escaped_fragment_
         console.log(path)
         if (path.startsWith('/v/')) {
-            getVideoHTML(path.split('/')[2], path.split('/')[3], function(err, contentHTML, pageTitle, description) {
+            getVideoHTML(
+            path.split('/')[2],
+            path.split('/')[3],
+            function(err, contentHTML, pageTitle, description, url, snap) {
                 if (error(err, next)) return
                 getDTubeHTML(function(err, baseHTML) {
                     if (error(err, next)) return
                     baseHTML = baseHTML.replace('@@CONTENT@@', contentHTML)
                     baseHTML = baseHTML.replace('@@TITLE@@', pageTitle)
                     baseHTML = baseHTML.replace('@@DESCRIPTION@@', description)
+                    baseHTML = baseHTML.replace('@@URL@@', url)
+                    baseHTML = baseHTML.replace('@@SNAP@@', snap)
                     res.send(baseHTML)
                 })
             })
@@ -86,8 +91,11 @@ function getVideoHTML(author, permlink, cb) {
             html += downvotedBy.join(', ')
             html += '</p>'
         }
+        
+        var url = 'https://d.tube/#!/v/'+video.info.author+'/'+video.info.permlink
+        var snap = 'https://ipfs.io/ipfs/'+video.info.snaphash
         var description = video.content.description.replace(/(?:\r\n|\r|\n)/g, ' ').substr(0, 300)
-        cb(null, html, video.info.title, description)
+        cb(null, html, video.info.title, description, url, snap)
     })
 }
 

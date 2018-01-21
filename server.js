@@ -9,7 +9,7 @@ steem.api.setOptions({ url: 'https://api.steemit.com' });
 
 app.get('*', function(req, res, next) {
     console.log('New GET!', req.query)
-    //console.log('User-Agent: ', req.headers['user-agent'])
+    console.log('User-Agent: ', req.headers['user-agent'])
     if (req.query._escaped_fragment_) {
         var path = req.query._escaped_fragment_
         console.log(path)
@@ -30,7 +30,7 @@ app.get('*', function(req, res, next) {
 })
 
 app.use('/static', express.static(path.join(__dirname, 'static')))
-app.listen(port, () => console.log('Example app listening on port '+port))
+app.listen(port, () => console.log('minidtube listening on port '+port))
 
 function error(err, next) {
     if (err) {
@@ -85,7 +85,6 @@ function getVideoHTML(author, permlink, cb) {
             html += downvotedBy.join(', ')
             html += '</p>'
         }
-        console.log(video.content.description)
         cb(null, html, video.info.title)
     })
 }

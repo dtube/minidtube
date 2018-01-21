@@ -15,7 +15,10 @@ app.get('*', function(req, res, next) {
     var isRobot = getRobotName(req.headers['user-agent'])
     console.log('GET', req.path, req.query)
     console.log('Robot: ', isRobot)
-    if (!isRobot) next()
+    if (!isRobot) {
+        next()
+        return
+    }
 
     var path = null
     if (req.query._escaped_fragment_)

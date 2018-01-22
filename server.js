@@ -8,7 +8,7 @@ const port = process.env.PORT || 3000
 var jsonfile = require('jsonfile')
 var file = 'robots.json'
 var crawlers = jsonfile.readFileSync(file)
-var allowedRobots = ['facebookexternalhit', 'Discordbot']
+var allowedRobots = ['facebookexternalhit', 'Discordbot', 'bingbot']
 
 steem.api.setOptions({ url: 'https://api.steemit.com' });
 

@@ -1,0 +1,3 @@
+[submodule "static/production"]
+	path = static/production
+	url = https://github.com/dtube/production

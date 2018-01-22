@@ -17,17 +17,27 @@ app.get('*', function(req, res, next) {
     console.log('GET', req.path, req.query)
     console.log('Robot: ', isRobot)
 
-    var path = null
+    var reqPath = null
     if (req.query._escaped_fragment_)
-        path = req.query._escaped_fragment_
+        reqPath = req.query._escaped_fragment_
     else
-        path = req.path
+        reqPath = req.path
 
-    if (isRobot && allowedRobots.indexOf(isRobot) > -1 && path.startsWith('/v/')) {
+    // if (reqPath.startsWith('/DTube_files/')) {
+    //     console.log('test')
+    //     fs.readFile(path.join(__dirname,"static","production","DTube_files",reqPath.replace('/DTube_files/','')), 'utf8', function (err,data) {
+    //         if (error(err, next)) return
+    //         res.send(data)
+    //         return
+    //     });
+    //     return
+    // }
+
+    if (isRobot && allowedRobots.indexOf(isRobot) > -1 && reqPath.startsWith('/v/')) {
         // DIRTY ROBOTS
         getVideoHTML(
-        path.split('/')[2],
-        path.split('/')[3],
+        reqPath.split('/')[2],
+        reqPath.split('/')[3],
         function(err, contentHTML, pageTitle, description, url, snap, urlvideo, duration) {
             if (error(err, next)) return
             getRobotHTML(function(err, baseHTML) {
@@ -52,21 +62,21 @@ app.get('*', function(req, res, next) {
     } else {
         // HUMAN BROWSER
         // AND DISALLOWED ROBOTS
-        if (path != '/') {
-            res.redirect('/#!'+path);
-            return
-        } else {
+        if (reqPath != '/' && !reqPath.startsWith('/DTube_files/')) {
+            res.redirect('/#!'+reqPath);
+        } else if (reqPath == '/') {
             getHumanHTML(function(err, humanHTML) {
                 if (error(err, next)) return
                 res.send(humanHTML)
-                return
             })
+        } else {
+            next()
         }
     }
     
 })
 
-app.use('/static', express.static(path.join(__dirname, 'static')))
+app.use('/DTube_files', express.static(path.join(__dirname, 'static/production/DTube_files')))
 app.listen(port, () => console.log('minidtube listening on port '+port))
 
 function error(err, next) {
@@ -90,7 +100,7 @@ function getRobotHTML(cb) {
 }
 
 function getHumanHTML(cb) {
-    fs.readFile(path.join(__dirname,"static","default.html"), 'utf8', function (err,data) {
+    fs.readFile(path.join(__dirname,"static","production","index.html"), 'utf8', function (err,data) {
         if (err) {
             cb(err)
             return

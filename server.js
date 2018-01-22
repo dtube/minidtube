@@ -50,7 +50,8 @@ app.get('*', function(req, res, next) {
                 baseHTML = baseHTML.replace(/@@VIDEO@@/g, htmlEncode(urlvideo))
                 if (duration) {
                     var durationHTML = '<meta property="og:video:duration" content="@@VIDEODURATION@@" />'
-                    durationHTML = durationHTML.replace(/@@VIDEODURATION@@/g, htmlEncode(duration))
+                    console.log(duration)
+                    durationHTML = durationHTML.replace(/@@VIDEODURATION@@/g, htmlEncode(""+duration))
                     baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, durationHTML)
                 } else {
                     baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, '')

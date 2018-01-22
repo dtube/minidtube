@@ -15,10 +15,6 @@ app.get('*', function(req, res, next) {
     var isRobot = getRobotName(req.headers['user-agent'])
     console.log('GET', req.path, req.query)
     console.log('Robot: ', isRobot)
-    if (!isRobot) {
-        next()
-        return
-    }
 
     var path = null
     if (req.query._escaped_fragment_)
@@ -26,34 +22,50 @@ app.get('*', function(req, res, next) {
     else
         path = req.path
 
-    if (path.startsWith('/v/')) {
-        getVideoHTML(
-        path.split('/')[2],
-        path.split('/')[3],
-        function(err, contentHTML, pageTitle, description, url, snap, urlvideo, duration) {
-            if (error(err, next)) return
-            getDTubeHTML(function(err, baseHTML) {
+    if (!isRobot && process.env.PORT) {
+        // HUMAN BROWSER
+        if (path != '/') {
+            res.redirect('/#!'+path);
+            return
+        } else {
+            getHumanHTML(function(err, humanHTML) {
                 if (error(err, next)) return
-                baseHTML = baseHTML.replace(/@@CONTENT@@/g, contentHTML)
-                baseHTML = baseHTML.replace(/@@TITLE@@/g, htmlEncode(pageTitle))
-                baseHTML = baseHTML.replace(/@@DESCRIPTION@@/g, htmlEncode(description))
-                baseHTML = baseHTML.replace(/@@URL@@/g, htmlEncode(url))
-                baseHTML = baseHTML.replace(/@@SNAP@@/g, htmlEncode(snap))
-                baseHTML = baseHTML.replace(/@@VIDEO@@/g, htmlEncode(urlvideo))
-                if (duration) {
-                    var durationHTML = '<meta property="og:video:duration" content="@@VIDEODURATION@@" />'
-                    durationHTML = durationHTML.replace(/@@VIDEODURATION@@/g, htmlEncode(duration))
-                    baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, durationHTML)
-                } else {
-                    baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, '')
-                }
-                
-                res.send(baseHTML)
+                res.send(humanHTML)
+                return
             })
-        })
+        }
     } else {
-        next()
+        // DIRTY ROBOTS
+        if (path.startsWith('/v/')) {
+            getVideoHTML(
+            path.split('/')[2],
+            path.split('/')[3],
+            function(err, contentHTML, pageTitle, description, url, snap, urlvideo, duration) {
+                if (error(err, next)) return
+                getRobotHTML(function(err, baseHTML) {
+                    if (error(err, next)) return
+                    baseHTML = baseHTML.replace(/@@CONTENT@@/g, contentHTML)
+                    baseHTML = baseHTML.replace(/@@TITLE@@/g, htmlEncode(pageTitle))
+                    baseHTML = baseHTML.replace(/@@DESCRIPTION@@/g, htmlEncode(description))
+                    baseHTML = baseHTML.replace(/@@URL@@/g, htmlEncode(url))
+                    baseHTML = baseHTML.replace(/@@SNAP@@/g, htmlEncode(snap))
+                    baseHTML = baseHTML.replace(/@@VIDEO@@/g, htmlEncode(urlvideo))
+                    if (duration) {
+                        var durationHTML = '<meta property="og:video:duration" content="@@VIDEODURATION@@" />'
+                        durationHTML = durationHTML.replace(/@@VIDEODURATION@@/g, htmlEncode(duration))
+                        baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, durationHTML)
+                    } else {
+                        baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, '')
+                    }
+                    
+                    res.send(baseHTML)
+                })
+            })
+        } else {
+            next()
+        }
     }
+    
 })
 
 app.use('/static', express.static(path.join(__dirname, 'static')))
@@ -68,8 +80,19 @@ function error(err, next) {
     return false
 }
 
-function getDTubeHTML(cb) {
-    fs.readFile(path.join(__dirname,"static","DTube.html"), 'utf8', function (err,data) {
+function getRobotHTML(cb) {
+    fs.readFile(path.join(__dirname,"static","robots.html"), 'utf8', function (err,data) {
+        if (err) {
+            cb(err)
+            return
+        } else {
+            cb(null, data)
+        }
+    });
+}
+
+function getHumanHTML(cb) {
+    fs.readFile(path.join(__dirname,"static","default.html"), 'utf8', function (err,data) {
         if (err) {
             cb(err)
             return

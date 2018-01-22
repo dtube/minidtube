@@ -33,6 +33,10 @@ app.get('*', function(req, res, next) {
     //     return
     // }
 
+    if (reqPath.startsWith('/sockjs/info')) {
+        next()
+    }
+
     if (isRobot && allowedRobots.indexOf(isRobot) > -1 && reqPath.startsWith('/v/')) {
         // DIRTY ROBOTS
         getVideoHTML(

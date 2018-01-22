@@ -34,7 +34,7 @@ app.get('*', function(req, res, next) {
     // }
 
     if (reqPath.startsWith('/sockjs/info')) {
-        res.send('{disabled:true}')
+        res.send('{}')
         return;
     }
 

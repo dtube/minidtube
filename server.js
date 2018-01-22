@@ -5,10 +5,11 @@ const steem = require('steem')
 const htmlEncode = require('htmlencode').htmlEncode;
 const app = express()
 const port = process.env.PORT || 3000
-var jsonfile = require('jsonfile')
-var file = 'robots.json'
-var crawlers = jsonfile.readFileSync(file)
-var allowedRobots = ['facebookexternalhit', 'Discordbot', 'bingbot']
+const jsonfile = require('jsonfile')
+const file = 'robots.json'
+const crawlers = jsonfile.readFileSync(file)
+// currently whitelisting a few robots
+const allowedRobots = ['facebookexternalhit', 'Discordbot', 'bingbot']
 
 steem.api.setOptions({ url: 'https://api.steemit.com' });
 
@@ -51,6 +52,7 @@ app.get('*', function(req, res, next) {
                 baseHTML = baseHTML.replace(/@@TITLE@@/g, htmlEncode(pageTitle))
                 baseHTML = baseHTML.replace(/@@DESCRIPTION@@/g, htmlEncode(description))
                 baseHTML = baseHTML.replace(/@@URL@@/g, htmlEncode(url))
+                // facebook minimum snap is 200x200 otherwise useless
                 baseHTML = baseHTML.replace(/@@SNAP@@/g, htmlEncode(snap))
                 baseHTML = baseHTML.replace(/@@VIDEO@@/g, htmlEncode(urlvideo))
                 if (duration) {

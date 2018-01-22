@@ -149,7 +149,7 @@ function getVideoHTML(author, permlink, cb) {
         var urlVideo = 'https://ipfs.io/ipfs'+hashVideo
         var duration = video.info.duration || null
         var description = video.content.description.replace(/(?:\r\n|\r|\n)/g, ' ').substr(0, 300)
-        cb(null, html, video.info.title, description, url, snap, urlVideo)
+        cb(null, html, video.info.title, description, url, snap, urlVideo, duration)
     })
 }
 

@@ -8,6 +8,7 @@ const port = process.env.PORT || 3000
 var jsonfile = require('jsonfile')
 var file = 'robots.json'
 var crawlers = jsonfile.readFileSync(file)
+var allowedRobots = ['facebookexternalhit', 'Discordbot']
 
 steem.api.setOptions({ url: 'https://api.steemit.com' });
 
@@ -22,8 +23,35 @@ app.get('*', function(req, res, next) {
     else
         path = req.path
 
-    if (!isRobot && process.env.PORT) {
+    if (isRobot && allowedRobots.indexOf(isRobot) > -1 && path.startsWith('/v/')) {
+        // DIRTY ROBOTS
+        getVideoHTML(
+        path.split('/')[2],
+        path.split('/')[3],
+        function(err, contentHTML, pageTitle, description, url, snap, urlvideo, duration) {
+            if (error(err, next)) return
+            getRobotHTML(function(err, baseHTML) {
+                if (error(err, next)) return
+                baseHTML = baseHTML.replace(/@@CONTENT@@/g, contentHTML)
+                baseHTML = baseHTML.replace(/@@TITLE@@/g, htmlEncode(pageTitle))
+                baseHTML = baseHTML.replace(/@@DESCRIPTION@@/g, htmlEncode(description))
+                baseHTML = baseHTML.replace(/@@URL@@/g, htmlEncode(url))
+                baseHTML = baseHTML.replace(/@@SNAP@@/g, htmlEncode(snap))
+                baseHTML = baseHTML.replace(/@@VIDEO@@/g, htmlEncode(urlvideo))
+                if (duration) {
+                    var durationHTML = '<meta property="og:video:duration" content="@@VIDEODURATION@@" />'
+                    durationHTML = durationHTML.replace(/@@VIDEODURATION@@/g, htmlEncode(duration))
+                    baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, durationHTML)
+                } else {
+                    baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, '')
+                }
+                
+                res.send(baseHTML)
+            })
+        })
+    } else {
         // HUMAN BROWSER
+        // AND DISALLOWED ROBOTS
         if (path != '/') {
             res.redirect('/#!'+path);
             return
@@ -33,36 +61,6 @@ app.get('*', function(req, res, next) {
                 res.send(humanHTML)
                 return
             })
-        }
-    } else {
-        // DIRTY ROBOTS
-        if (path.startsWith('/v/')) {
-            getVideoHTML(
-            path.split('/')[2],
-            path.split('/')[3],
-            function(err, contentHTML, pageTitle, description, url, snap, urlvideo, duration) {
-                if (error(err, next)) return
-                getRobotHTML(function(err, baseHTML) {
-                    if (error(err, next)) return
-                    baseHTML = baseHTML.replace(/@@CONTENT@@/g, contentHTML)
-                    baseHTML = baseHTML.replace(/@@TITLE@@/g, htmlEncode(pageTitle))
-                    baseHTML = baseHTML.replace(/@@DESCRIPTION@@/g, htmlEncode(description))
-                    baseHTML = baseHTML.replace(/@@URL@@/g, htmlEncode(url))
-                    baseHTML = baseHTML.replace(/@@SNAP@@/g, htmlEncode(snap))
-                    baseHTML = baseHTML.replace(/@@VIDEO@@/g, htmlEncode(urlvideo))
-                    if (duration) {
-                        var durationHTML = '<meta property="og:video:duration" content="@@VIDEODURATION@@" />'
-                        durationHTML = durationHTML.replace(/@@VIDEODURATION@@/g, htmlEncode(duration))
-                        baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, durationHTML)
-                    } else {
-                        baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, '')
-                    }
-                    
-                    res.send(baseHTML)
-                })
-            })
-        } else {
-            next()
         }
     }
     

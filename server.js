@@ -34,7 +34,8 @@ app.get('*', function(req, res, next) {
     // }
 
     if (reqPath.startsWith('/sockjs/info')) {
-        next()
+        res.send('{disabled:true}')
+        return;
     }
 
     if (isRobot && allowedRobots.indexOf(isRobot) > -1 && reqPath.startsWith('/v/')) {

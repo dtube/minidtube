@@ -1,7 +1,7 @@
 const fs = require('fs')
 const express = require('express')
 const path = require('path')
-const steem = require('steem')
+const { createClient } = require('lightrpc');
 const htmlEncode = require('htmlencode').htmlEncode;
 const app = express()
 const port = process.env.PORT || 3000
@@ -12,7 +12,7 @@ const crawlers = jsonfile.readFileSync(file)
 const allowedRobots = ['facebookexternalhit', 'Discordbot', 'bingbot']
 const rootDomain = 'https://stage.d.tube'
 
-steem.api.setOptions({ url: 'https://api.steemit.com' });
+const lightrpc = createClient('https://api.steemit.com');
 
 let layouts = {}
 
@@ -131,7 +131,7 @@ function getHumanHTML(cb) {
 }
 
 function getVideoHTML(author, permlink, cb) {
-    steem.api.getState('/dtube/@'+author+'/'+permlink, function(err, result) {
+    lightrpc.send('get_state', [`/dtube/@${author}/${permlink}`], function(err, result) {
         if (err) {
             cb(err)
             return

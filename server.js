@@ -18,8 +18,7 @@ let layouts = {}
 
 app.get('*', function(req, res, next) {
     var isRobot = getRobotName(req.headers['user-agent'])
-    console.log('GET', req.path, req.query)
-    console.log('Robot: ', isRobot)
+    console.log(isRobot, 'GET', req.path, req.query)
 
     // parsing the query
     var reqPath = null
@@ -34,6 +33,7 @@ app.get('*', function(req, res, next) {
         return;
     }
 
+    
     if (isRobot && allowedRobots.indexOf(isRobot) > -1 && reqPath.startsWith('/v/')) {
         // DIRTY ROBOTS
         getVideoHTML(
@@ -52,7 +52,6 @@ app.get('*', function(req, res, next) {
                 baseHTML = baseHTML.replace(/@@VIDEO@@/g, htmlEncode(urlvideo))
                 if (duration) {
                     var durationHTML = '<meta property="og:video:duration" content="@@VIDEODURATION@@" />'
-                    console.log(duration)
                     durationHTML = durationHTML.replace(/@@VIDEODURATION@@/g, htmlEncode(""+duration))
                     baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, durationHTML)
                 } else {
@@ -122,7 +121,7 @@ function getHumanHTML(cb) {
                 cb(err)
                 return
             } else {
-                layouts.robot = data
+                layouts.human = data
                 cb(null, data)
                 return
             }
@@ -136,6 +135,7 @@ function getVideoHTML(author, permlink, cb) {
             cb(err)
             return
         }
+        //console.log(result.content[author+'/'+permlink])
         var video = parseVideo(result.content[author+'/'+permlink])
         if (!video.content || !video.info) {
             cb('Weird error')
@@ -180,7 +180,9 @@ function getVideoHTML(author, permlink, cb) {
 function parseVideo(video, isComment) {
     try {
       var newVideo = JSON.parse(video.json_metadata).video
-    } catch(e) {}
+    } catch(e) {
+        console.log(e)
+    }
     if (!newVideo) newVideo = {}
     newVideo.active_votes = video.active_votes
     newVideo.author = video.author

@@ -15,8 +15,8 @@
   "dependencies": {
     "express": "^4.16.2",
     "htmlencode": "0.0.4",
+    "lightrpc": "0.0.5",
     "jsonfile": "^4.0.0",
-    "path": "^0.12.7",
-    "steem": "^0.6.7"
+    "path": "^0.12.7"
   }
 }

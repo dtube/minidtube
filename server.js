@@ -16,6 +16,19 @@ const lightrpc = createClient('https://api.steemit.com');
 
 let layouts = {}
 
+app.use(function (req, res, next) {
+    var sslUrl;
+
+    if (process.env.NODE_ENV === 'production' &&
+        req.headers['x-forwarded-proto'] !== 'https') {
+
+        sslUrl = [rootDomain, req.url].join('');
+        return res.redirect(sslUrl);
+    }
+
+    return next();
+});
+
 app.get('*', function(req, res, next) {
     var isRobot = getRobotName(req.headers['user-agent'])
     console.log(isRobot, 'GET', req.path, req.query)

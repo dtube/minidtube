@@ -137,6 +137,10 @@ function getVideoHTML(author, permlink, cb) {
             return
         }
         var video = parseVideo(result.content[author+'/'+permlink])
+        if (!video.content || !video.info) {
+            cb('Weird error')
+            return;
+        }
         var hashVideo = video.content.video480hash ? video.content.video480hash : video.content.videohash
         var upvotedBy = []
         var downvotedBy = []
@@ -166,7 +170,7 @@ function getVideoHTML(author, permlink, cb) {
         
         var url = rootDomain+'/#!/v/'+video.info.author+'/'+video.info.permlink
         var snap = 'https://ipfs.io/ipfs/'+video.info.snaphash
-        var urlVideo = 'https://ipfs.io/ipfs'+hashVideo
+        var urlVideo = 'https://ipfs.io/ipfs/'+hashVideo
         var duration = video.info.duration || null
         var description = video.content.description.replace(/(?:\r\n|\r|\n)/g, ' ').substr(0, 300)
         cb(null, html, video.info.title, description, url, snap, urlVideo, duration)

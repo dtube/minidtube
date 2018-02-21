@@ -14,26 +14,20 @@ const rootDomain = 'https://stage.d.tube'
 
 steem.api.setOptions({ url: 'https://api.steemit.com' });
 
+let layouts = {}
+
 app.get('*', function(req, res, next) {
     var isRobot = getRobotName(req.headers['user-agent'])
     console.log('GET', req.path, req.query)
     console.log('Robot: ', isRobot)
 
+    // parsing the query
     var reqPath = null
     if (req.query._escaped_fragment_)
         reqPath = req.query._escaped_fragment_
     else
         reqPath = req.path
 
-    // if (reqPath.startsWith('/DTube_files/')) {
-    //     console.log('test')
-    //     fs.readFile(path.join(__dirname,"static","production","DTube_files",reqPath.replace('/DTube_files/','')), 'utf8', function (err,data) {
-    //         if (error(err, next)) return
-    //         res.send(data)
-    //         return
-    //     });
-    //     return
-    // }
 
     if (reqPath.startsWith('/sockjs/info')) {
         res.send('{}')
@@ -68,6 +62,8 @@ app.get('*', function(req, res, next) {
                 res.send(baseHTML)
             })
         })
+    } else if (isRobot && allowedRobots.indexOf(isRobot) > -1 && reqPath.startsWith('/c/')) {
+
     } else {
         // HUMAN BROWSER
         // AND DISALLOWED ROBOTS
@@ -98,25 +94,40 @@ function error(err, next) {
 }
 
 function getRobotHTML(cb) {
-    fs.readFile(path.join(__dirname,"static","robots.html"), 'utf8', function (err,data) {
-        if (err) {
-            cb(err)
-            return
-        } else {
-            cb(null, data)
-        }
-    });
+    if (layouts.robot) {
+        cb(null, layouts.robot)
+        return
+    }
+    else {
+        fs.readFile(path.join(__dirname,"static","robots.html"), 'utf8', function (err,data) {
+            if (err) {
+                cb(err)
+                return
+            } else {
+                layouts.robot = data
+                cb(null, data)
+                return
+            }
+        });
+    }
 }
 
 function getHumanHTML(cb) {
-    fs.readFile(path.join(__dirname,"static","production","index.html"), 'utf8', function (err,data) {
-        if (err) {
-            cb(err)
-            return
-        } else {
-            cb(null, data)
-        }
-    });
+    if (layouts.human) {
+        cb(null, layouts.human)
+        return
+    } else {
+        fs.readFile(path.join(__dirname,"static","production","index.html"), 'utf8', function (err,data) {
+            if (err) {
+                cb(err)
+                return
+            } else {
+                layouts.robot = data
+                cb(null, data)
+                return
+            }
+        });
+    }
 }
 
 function getVideoHTML(author, permlink, cb) {

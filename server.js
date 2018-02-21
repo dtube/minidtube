@@ -10,7 +10,7 @@ const file = 'robots.json'
 const crawlers = jsonfile.readFileSync(file)
 // currently whitelisting a few robots
 const allowedRobots = ['facebookexternalhit', 'Discordbot', 'bingbot']
-const rootDomain = 'https://stage.d.tube'
+const rootDomain = 'https://staging.d.tube'
 
 const lightrpc = createClient('https://api.steemit.com');
 

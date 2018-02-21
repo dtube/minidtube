@@ -10,6 +10,7 @@ const file = 'robots.json'
 const crawlers = jsonfile.readFileSync(file)
 // currently whitelisting a few robots
 const allowedRobots = ['facebookexternalhit', 'Discordbot', 'bingbot']
+const rootDomain = 'https://stage.d.tube'
 
 steem.api.setOptions({ url: 'https://api.steemit.com' });
 
@@ -152,7 +153,7 @@ function getVideoHTML(author, permlink, cb) {
             html += '</p>'
         }
         
-        var url = 'https://obscure-headland-27356.herokuapp.com/#!/v/'+video.info.author+'/'+video.info.permlink
+        var url = rootDomain+'/#!/v/'+video.info.author+'/'+video.info.permlink
         var snap = 'https://ipfs.io/ipfs/'+video.info.snaphash
         var urlVideo = 'https://ipfs.io/ipfs'+hashVideo
         var duration = video.info.duration || null

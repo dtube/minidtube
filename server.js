@@ -9,7 +9,8 @@ const jsonfile = require('jsonfile')
 const file = 'robots.json'
 const crawlers = jsonfile.readFileSync(file)
 // currently whitelisting a few robots
-const allowedRobots = ['facebookexternalhit', 'Discordbot', 'bingbot']
+const allowedRobots = ['facebookexternalhit', 'Discordbot', 'Slackbot'
+    , 'bingbot', 'Twitterbot']
 const rootDomain = 'https://d.tube'
 
 const lightrpc = createClient('https://api.steemit.com');

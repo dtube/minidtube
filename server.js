@@ -33,12 +33,6 @@ app.get('*', function(req, res, next) {
         res.send('{}')
         return;
     }
-    if (reqPath == '/favicon.ico') {
-        return;
-    }
-    if (reqPath.startsWith('/DTube_files')) {
-        return;
-    }
 
     if (isRobot)
         console.log(isRobot, 'GET', req.path, req.query)
@@ -73,15 +67,13 @@ app.get('*', function(req, res, next) {
     } else {
         // HUMAN BROWSER
         // AND DISALLOWED ROBOTS
-        if (reqPath != '/') {
-            res.redirect('/#!'+reqPath);
-        } else if (reqPath == '/') {
+        if (reqPath == '/') {
             getHumanHTML(function(err, humanHTML) {
                 if (error(err, next)) return
                 res.send(humanHTML)
             })
         } else {
-            next()
+            res.redirect('/#!'+reqPath);
         }
     }
     

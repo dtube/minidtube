@@ -16,10 +16,10 @@ const lightrpc = createClient('https://api.steemit.com');
 
 let layouts = {}
 
+app.use('/DTube_files', express.static(path.join(__dirname, 'static/production/DTube_files')))
+app.use('/favicon.ico', express.static(path.join(__dirname, 'static/production/DTube_files/images/dtubefavicon.png')))
 app.get('*', function(req, res, next) {
     var isRobot = getRobotName(req.headers['user-agent'])
-    if (isRobot)
-        console.log(isRobot, 'GET', req.path, req.query)
 
     // parsing the query
     var reqPath = null
@@ -28,12 +28,21 @@ app.get('*', function(req, res, next) {
     else
         reqPath = req.path
 
-
     if (reqPath.startsWith('/sockjs/info')) {
         res.send('{}')
         return;
     }
 
+    if (reqPath == '/favicon.ico') {
+        return;
+    }
+
+    if (reqPath.startsWith('/DTube_files')) {
+        return;
+    }
+
+    if (isRobot)
+        console.log(isRobot, 'GET', req.path, req.query)
     
     if (isRobot && allowedRobots.indexOf(isRobot) > -1 && reqPath.startsWith('/v/')) {
         // DIRTY ROBOTS
@@ -67,7 +76,7 @@ app.get('*', function(req, res, next) {
     } else {
         // HUMAN BROWSER
         // AND DISALLOWED ROBOTS
-        if (reqPath != '/' && !reqPath.startsWith('/DTube_files/')) {
+        if (reqPath != '/') {
             res.redirect('/#!'+reqPath);
         } else if (reqPath == '/') {
             getHumanHTML(function(err, humanHTML) {
@@ -81,7 +90,6 @@ app.get('*', function(req, res, next) {
     
 })
 
-app.use('/DTube_files', express.static(path.join(__dirname, 'static/production/DTube_files')))
 app.listen(port, () => console.log('minidtube listening on port '+port))
 
 function error(err, next) {

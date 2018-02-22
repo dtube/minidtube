@@ -32,11 +32,9 @@ app.get('*', function(req, res, next) {
         res.send('{}')
         return;
     }
-
     if (reqPath == '/favicon.ico') {
         return;
     }
-
     if (reqPath.startsWith('/DTube_files')) {
         return;
     }
@@ -71,8 +69,6 @@ app.get('*', function(req, res, next) {
                 res.send(baseHTML)
             })
         })
-    } else if (isRobot && allowedRobots.indexOf(isRobot) > -1 && reqPath.startsWith('/c/')) {
-
     } else {
         // HUMAN BROWSER
         // AND DISALLOWED ROBOTS

@@ -9,8 +9,8 @@ const jsonfile = require('jsonfile')
 const file = 'robots.json'
 const crawlers = jsonfile.readFileSync(file)
 // currently whitelisting a few robots
-const allowedRobots = ['facebookexternalhit', 'Discordbot', 'Slackbot'
-    , 'bingbot', 'Twitterbot']
+// const allowedRobots = ['facebookexternalhit', 'Discordbot', 'Slackbot'
+//     , 'bingbot', 'Twitterbot']
 const rootDomain = 'https://d.tube'
 
 const lightrpc = createClient('https://api.steemit.com');
@@ -37,7 +37,7 @@ app.get('*', function(req, res, next) {
     if (isRobot)
         console.log(isRobot, 'GET', req.path, req.query)
     
-    if (isRobot && allowedRobots.indexOf(isRobot) > -1 && reqPath.startsWith('/v/')) {
+    if (isRobot && reqPath.startsWith('/v/')) {
         // DIRTY ROBOTS
         getVideoHTML(
         reqPath.split('/')[2],

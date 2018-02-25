@@ -42,7 +42,7 @@ app.get('*', function(req, res, next) {
         getVideoHTML(
         reqPath.split('/')[2],
         reqPath.split('/')[3],
-        function(err, contentHTML, pageTitle, description, url, snap, urlvideo, duration) {
+        function(err, contentHTML, pageTitle, description, url, snap, urlvideo, duration, embedUrl) {
             if (error(err, next)) return
             getRobotHTML(function(err, baseHTML) {
                 if (error(err, next)) return
@@ -54,9 +54,10 @@ app.get('*', function(req, res, next) {
                 // facebook minimum snap is 200x200 otherwise useless
                 baseHTML = baseHTML.replace(/@@SNAP@@/g, htmlEncode(snap))
                 baseHTML = baseHTML.replace(/@@VIDEO@@/g, htmlEncode(urlvideo))
+                baseHTML = baseHTML.replace(/@@EMBEDURL@@/g, htmlEncode(embedUrl))
                 if (duration) {
                     var durationHTML = '<meta property="og:video:duration" content="@@VIDEODURATION@@" />'
-                    durationHTML = durationHTML.replace(/@@VIDEODURATION@@/g, htmlEncode(""+duration))
+                    durationHTML = durationHTML.replace(/@@VIDEODURATION@@/g, htmlEncode(""+Math.round(duration)))
                     baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, durationHTML)
                 } else {
                     baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, '')
@@ -170,9 +171,10 @@ function getVideoHTML(author, permlink, cb) {
         var url = rootDomain+'/#!/v/'+video.info.author+'/'+video.info.permlink
         var snap = 'https://ipfs.io/ipfs/'+video.info.snaphash
         var urlVideo = 'https://ipfs.io/ipfs/'+hashVideo
+        var embedUrl = 'https://emb.d.tube/#!/'+video.info.author+'/'+video.info.permlink+'/true'
         var duration = video.info.duration || null
         var description = video.content.description.replace(/(?:\r\n|\r|\n)/g, ' ').substr(0, 300)
-        cb(null, html, video.info.title, description, url, snap, urlVideo, duration)
+        cb(null, html, video.info.title, description, url, snap, urlVideo, duration, embedUrl)
     })
 }
 

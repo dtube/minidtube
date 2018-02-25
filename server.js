@@ -24,7 +24,7 @@ app.get('*', function(req, res, next) {
 
     // parsing the query
     var reqPath = null
-    if (req.query._escaped_fragment_)
+    if (req.query._escaped_fragment_ && req.query._escaped_fragment_.length > 0)
         reqPath = req.query._escaped_fragment_
     else
         reqPath = req.path

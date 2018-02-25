@@ -50,6 +50,7 @@ app.get('*', function(req, res, next) {
                 baseHTML = baseHTML.replace(/@@TITLE@@/g, htmlEncode(pageTitle))
                 baseHTML = baseHTML.replace(/@@DESCRIPTION@@/g, htmlEncode(description))
                 baseHTML = baseHTML.replace(/@@URL@@/g, htmlEncode(url))
+                baseHTML = baseHTML.replace(/@@URLNOHASH@@/g, htmlEncode(url).replace('/#!',''))
                 // facebook minimum snap is 200x200 otherwise useless
                 baseHTML = baseHTML.replace(/@@SNAP@@/g, htmlEncode(snap))
                 baseHTML = baseHTML.replace(/@@VIDEO@@/g, htmlEncode(urlvideo))

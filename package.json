@@ -13,10 +13,11 @@
   "author": "Adrien M",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.4",
     "express": "^4.16.2",
     "htmlencode": "0.0.4",
-    "lightrpc": "0.0.5",
     "jsonfile": "^4.0.0",
+    "lightrpc": "0.0.5",
     "path": "^0.12.7"
   }
 }

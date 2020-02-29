@@ -2315,5 +2315,12 @@
       "instances": [
         "Mozilla/5.0 (compatible; DnyzBot/1.0)"
       ]
+    },
+    {
+      "pattern": "Iframely", 
+      "addition_date": "2020/02/29", 
+      "instances": [
+        "Iframely/0.7.3 (+http://iframely.com/;)"
+      ]
     }
   ]

@@ -145,7 +145,7 @@ function handleChainData(author, permlink, video, cb) {
     var description = null
     if (video.json.description)
         description = video.json.description
-    else if (video.json.content.description)
+    else if (video.json.content && video.json.content.description)
         description = video.json.content.description
     if (description)
         html += '<p><strong>Description: </strong>'+description.replace(/(?:\r\n|\r|\n)/g, '<br />')+'</p>'

@@ -37,7 +37,7 @@ app.get('*', function(req, res, next) {
     if (isRobot)
         console.log(isRobot, 'GET', req.path, req.query)
     
-    isRobot = true
+    // isRobot = true
     if (isRobot && reqPath.startsWith('/v/')) {
         // DIRTY ROBOTS
         getVideoHTML(

@@ -137,8 +137,7 @@ function handleChainData(author, permlink, video, cb) {
     }
 
     var html = ''
-    if (hashVideo)
-        html += '<video src="https://player.d.tube/btfs/'+hashVideo+'" poster="https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash+'" controls></video><br />'
+    html += '<iframe src="https://emb.d.tube/#!/'+author+'/'+permlink+'/true" width="480" height="270" frameborder="0" scrolling="no" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen=""></iframe>'
     var title = video.json.title || video.json.info.title
     html += '<h1>'+title+'</h1>'
     html += '<h2>Author: '+video.author+'</h2>'

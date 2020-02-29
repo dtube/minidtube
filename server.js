@@ -37,7 +37,7 @@ app.get('*', function(req, res, next) {
     if (isRobot)
         console.log(isRobot, 'GET', req.path, req.query)
     
-    // isRobot = true
+    isRobot = true
     if (isRobot && reqPath.startsWith('/v/')) {
         // DIRTY ROBOTS
         getVideoHTML(
@@ -129,7 +129,44 @@ function getHumanHTML(cb) {
         });
     }
 }
+function handleChainData(author, permlink, video, cb) {
+    if (video.json.ipfs) {
+        var hashVideo = video.json.ipfs.videohash
+        if (video.json.ipfs.video240hash) hashVideo = video.json.ipfs.video240hash
+        if (video.json.ipfs.video480hash) hashVideo = video.json.ipfs.video480hash
+    }
 
+    var html = ''
+    if (hashVideo)
+        html += '<video src="https://player.d.tube/btfs/'+hashVideo+'" poster="https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash+'" controls></video><br />'
+    var title = video.json.title || video.json.info.title
+    html += '<h1>'+title+'</h1>'
+    html += '<h2>Author: '+video.author+'</h2>'
+
+    var description = null
+    if (video.json.description)
+        description = video.json.description
+    else if (video.json.content.description)
+        description = video.json.content.description
+    if (description)
+        html += '<p><strong>Description: </strong>'+description.replace(/(?:\r\n|\r|\n)/g, '<br />')+'</p>'
+
+    var url = rootDomain+'/#!/v/'+author+'/'+permlink
+    var snap = null
+    if (video.json.ipfs && video.json.ipfs.snaphash)
+        snap = 'https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash
+    if (video.json.thumbnailUrl)
+        snap = video.json.thumbnailUrl
+    
+    var urlVideo = null
+    if (hashVideo) 
+        urlVideo = 'https://player.d.tube/btfs/'+hashVideo
+    var embedUrl = 'https://emb.d.tube/#!/'+author+'/'+permlink+'/true'
+    var duration = video.json.duration || null
+    
+    cb(null, html, title, description, url, snap, urlVideo, duration, embedUrl)
+
+}
 function getVideoHTML(author, permlink, cb) {
     var steemDone = false
     var avalonDone = false
@@ -140,35 +177,7 @@ function getVideoHTML(author, permlink, cb) {
                 cb(err)
             return
         }
-        
-        if (video.json.ipfs) {
-            var hashVideo = video.json.ipfs.videohash
-            if (video.json.ipfs.video240hash) hashVideo = video.json.ipfs.video240hash
-            if (video.json.ipfs.video480hash) hashVideo = video.json.ipfs.video480hash
-        }
-
-        var html = ''
-        if (hashVideo)
-            html += '<video src="https://player.d.tube/btfs/'+hashVideo+'" poster="https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash+'" controls></video><br />'
-        html += '<h1>'+video.json.title+'</h1>'
-        html += '<h2>Author: '+video.author+'</h2>'
-        html += '<p><strong>Description: </strong>'+video.json.description.replace(/(?:\r\n|\r|\n)/g, '<br />')+'</p>'
-        
-        var url = rootDomain+'/#!/v/'+author+'/'+permlink
-        var snap = null
-        if (video.json.ipfs && video.json.ipfs.snaphash)
-            snap = 'https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash
-        if (video.json.thumbnailUrl)
-            snap = video.json.thumbnailUrl
-        
-        var urlVideo = null
-        if (hashVideo) 
-            urlVideo = 'https://player.d.tube/btfs/'+hashVideo
-        var embedUrl = 'https://emb.d.tube/#!/'+author+'/'+permlink+'/true'
-        var duration = video.json.duration || null
-        
-        var description = video.json.description.replace(/(?:\r\n|\r|\n)/g, ' ').substr(0, 300)
-        cb(null, html, video.json.title, description, url, snap, urlVideo, duration, embedUrl)
+        handleChainData(author, permlink, video, cb)
     })
     lightrpc.send('get_state', [`/dtube/@${author}/${permlink}`], function(err, result) {
         steemDone = true
@@ -183,35 +192,7 @@ function getVideoHTML(author, permlink, cb) {
             return
         }
         var video = parseVideo(result.content[author+'/'+permlink])
-
-        if (video.json.ipfs) {
-            var hashVideo = video.json.ipfs.videohash
-            if (video.json.ipfs.video240hash) hashVideo = video.json.ipfs.video240hash
-            if (video.json.ipfs.video480hash) hashVideo = video.json.ipfs.video480hash
-        }
-
-        var html = ''
-        if (hashVideo)
-            html += '<video src="https://player.d.tube/btfs/'+hashVideo+'" poster="https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash+'" controls></video><br />'
-        html += '<h1>'+video.json.title+'</h1>'
-        html += '<h2>Author: '+video.author+'</h2>'
-        html += '<p><strong>Description: </strong>'+video.json.description.replace(/(?:\r\n|\r|\n)/g, '<br />')+'</p>'
-        
-        var url = rootDomain+'/#!/v/'+author+'/'+permlink
-        var snap = null
-        if (video.json.ipfs && video.json.ipfs.snaphash)
-            snap = 'https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash
-        if (video.json.thumbnailUrl)
-            snap = video.json.thumbnailUrl
-        
-        var urlVideo = null
-        if (hashVideo) 
-            urlVideo = 'https://player.d.tube/btfs/'+hashVideo
-        var embedUrl = 'https://emb.d.tube/#!/'+author+'/'+permlink+'/true'
-        var duration = video.json.duration || null
-        
-        var description = video.json.description.replace(/(?:\r\n|\r|\n)/g, ' ').substr(0, 300)
-        cb(null, html, video.json.title, description, url, snap, urlVideo, duration, embedUrl)
+        handleChainData(author, permlink, video, cb)
     })
 }
 

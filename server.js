@@ -10,12 +10,10 @@ const port = process.env.PORT || 3000
 const jsonfile = require('jsonfile')
 const file = 'robots.json'
 const crawlers = jsonfile.readFileSync(file)
-// currently whitelisting a few robots
-// const allowedRobots = ['facebookexternalhit', 'Discordbot', 'Slackbot'
-//     , 'bingbot', 'Twitterbot']
 const rootDomain = 'https://d.tube'
 
 const lightrpc = createClient('https://api.steemit.com');
+const javalon = require('javalon')
 
 let layouts = {}
 
@@ -132,71 +130,84 @@ function getHumanHTML(cb) {
 }
 
 function getVideoHTML(author, permlink, cb) {
-    lightrpc.send('get_state', [`/dtube/@${author}/${permlink}`], function(err, result) {
+    var steemDone = false
+    var avalonDone = false
+    javalon.getContent(author, permlink, function(err, video) {
+        avalonDone = true
         if (err) {
-            cb(err)
+            if (steemDone && cb)
+                cb(err)
             return
         }
-        //console.log(result.content[author+'/'+permlink])
-        var video = parseVideo(result.content[author+'/'+permlink])
-        if (!video.content || !video.info) {
-            cb('Weird error')
-            return;
-        }
-        var hashVideo = video.content.video480hash ? video.content.video480hash : video.content.videohash
-        var upvotedBy = []
-        var downvotedBy = []
-        for (let i = 0; i < video.active_votes.length; i++) {
-            if (parseInt(video.active_votes[i].rshares) > 0)
-                upvotedBy.push(video.active_votes[i].voter);    
-            if (parseInt(video.active_votes[i].rshares) < 0)
-                downvotedBy.push(video.active_votes[i].voter);         
-        }
+        var hashVideo = video.json.ipfs.videohash
+        if (video.json.ipfs.video240hash) hashVideo = video.json.ipfs.video240hash
+        if (video.json.ipfs.video480hash) hashVideo = video.json.ipfs.video480hash
 
         var html = ''
-        html += '<video src="https://ipfs.io/ipfs/'+hashVideo+'" poster="https://ipfs.io/ipfs/'+video.info.snaphash+'" controls></video><br />'
-        html += '<h1>'+video.info.title+'</h1>'
-        html += '<h2>Author: '+video.info.author+'</h2>'
-        html += '<h2>Date: '+video.created.split('T')[0]+'</h2>'
-        html += '<p><strong>Description: </strong>'+video.content.description.replace(/(?:\r\n|\r|\n)/g, '<br />')+'</p>'
-        if (upvotedBy.length > 0) {
-            html += '<p><strong>Upvoted by: </strong>'
-            html += upvotedBy.join(', ')
-            html += '</p>'
-        }
-        if (downvotedBy.length > 0) {
-            html += '<p><strong>Downvoted by: </strong>'
-            html += downvotedBy.join(', ')
-            html += '</p>'
-        }
+        html += '<video src="https://player.d.tube/btfs/'+hashVideo+'" poster="https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash+'" controls></video><br />'
+        html += '<h1>'+video.json.title+'</h1>'
+        html += '<h2>Author: '+video.author+'</h2>'
+        html += '<p><strong>Description: </strong>'+video.json.description.replace(/(?:\r\n|\r|\n)/g, '<br />')+'</p>'
         
-        var url = rootDomain+'/#!/v/'+video.info.author+'/'+video.info.permlink
-        var snap = 'https://ipfs.io/ipfs/'+video.info.snaphash
-        var urlVideo = 'https://ipfs.io/ipfs/'+hashVideo
-        var embedUrl = 'https://emb.d.tube/#!/'+video.info.author+'/'+video.info.permlink+'/true'
-        var duration = video.info.duration || null
-        var description = video.content.description.replace(/(?:\r\n|\r|\n)/g, ' ').substr(0, 300)
-        cb(null, html, video.info.title, description, url, snap, urlVideo, duration, embedUrl)
+        var url = rootDomain+'/#!/v/'+author+'/'+permlink
+        var snap = 'https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash
+        var urlVideo = 'https://player.d.tube/btfs/'+hashVideo
+        var embedUrl = 'https://emb.d.tube/#!/'+author+'/'+permlink+'/true'
+        var duration = video.json.duration || null
+        var description = video.json.description.replace(/(?:\r\n|\r|\n)/g, ' ').substr(0, 300)
+        cb(null, html, video.json.title, description, url, snap, urlVideo, duration, embedUrl)
+    })
+    lightrpc.send('get_state', [`/dtube/@${author}/${permlink}`], function(err, result) {
+        steemDone = true
+        if (err) {
+            if (avalonDone && cb)
+                cb(err)
+            return
+        }
+        if (!result.content[author+'/'+permlink]) {
+            if (avalonDone && cb)
+                cb('Not found')
+            return
+        }
+        var video = parseVideo(result.content[author+'/'+permlink])
+        var hashVideo = video.json.ipfs.videohash
+        if (video.json.ipfs.video240hash) hashVideo = video.json.ipfs.video240hash
+        if (video.json.ipfs.video480hash) hashVideo = video.json.ipfs.video480hash
+
+        var html = ''
+        html += '<video src="https://player.d.tube/btfs/'+hashVideo+'" poster="https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash+'" controls></video><br />'
+        html += '<h1>'+video.json.title+'</h1>'
+        html += '<h2>Author: '+video.author+'</h2>'
+        html += '<p><strong>Description: </strong>'+video.json.description.replace(/(?:\r\n|\r|\n)/g, '<br />')+'</p>'
+        
+        var url = rootDomain+'/#!/v/'+author+'/'+permlink
+        var snap = 'https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash
+        var urlVideo = 'https://player.d.tube/btfs/'+hashVideo
+        var embedUrl = 'https://emb.d.tube/#!/'+author+'/'+permlink+'/true'
+        var duration = video.json.duration || null
+        var description = video.json.description.replace(/(?:\r\n|\r|\n)/g, ' ').substr(0, 300)
+        cb(null, html, video.json.title, description, url, snap, urlVideo, duration, embedUrl)
     })
 }
 
 function parseVideo(video, isComment) {
     try {
-      var newVideo = JSON.parse(video.json_metadata).video
+      var newVideo = {} 
+      newVideo.json = JSON.parse(video.json_metadata).video
     } catch(e) {
         console.log(e)
     }
     if (!newVideo) newVideo = {}
-    newVideo.active_votes = video.active_votes
+    // newVideo.active_votes = video.active_votes
     newVideo.author = video.author
     newVideo.body = video.body
-    newVideo.total_payout_value = video.total_payout_value
-    newVideo.curator_payout_value = video.curator_payout_value
-    newVideo.pending_payout_value = video.pending_payout_value
+    // newVideo.total_payout_value = video.total_payout_value
+    // newVideo.curator_payout_value = video.curator_payout_value
+    // newVideo.pending_payout_value = video.pending_payout_value
     newVideo.permlink = video.permlink
     newVideo.created = video.created
-    newVideo.net_rshares = video.net_rshares
-    newVideo.reblogged_by = video.reblogged_by
+    // newVideo.net_rshares = video.net_rshares
+    // newVideo.reblogged_by = video.reblogged_by
     return newVideo;
 }
 

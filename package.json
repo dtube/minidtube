@@ -16,6 +16,7 @@
     "cors": "^2.8.4",
     "express": "^4.16.2",
     "htmlencode": "0.0.4",
+    "javalon": "^1.0.21",
     "jsonfile": "^4.0.0",
     "lightrpc": "0.0.5",
     "path": "^0.12.7"

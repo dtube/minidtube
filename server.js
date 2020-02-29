@@ -37,6 +37,7 @@ app.get('*', function(req, res, next) {
     if (isRobot)
         console.log(isRobot, 'GET', req.path, req.query)
     
+    isRobot = true
     if (isRobot && reqPath.startsWith('/v/')) {
         // DIRTY ROBOTS
         getVideoHTML(
@@ -139,21 +140,33 @@ function getVideoHTML(author, permlink, cb) {
                 cb(err)
             return
         }
-        var hashVideo = video.json.ipfs.videohash
-        if (video.json.ipfs.video240hash) hashVideo = video.json.ipfs.video240hash
-        if (video.json.ipfs.video480hash) hashVideo = video.json.ipfs.video480hash
+        
+        if (video.json.ipfs) {
+            var hashVideo = video.json.ipfs.videohash
+            if (video.json.ipfs.video240hash) hashVideo = video.json.ipfs.video240hash
+            if (video.json.ipfs.video480hash) hashVideo = video.json.ipfs.video480hash
+        }
 
         var html = ''
-        html += '<video src="https://player.d.tube/btfs/'+hashVideo+'" poster="https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash+'" controls></video><br />'
+        if (hashVideo)
+            html += '<video src="https://player.d.tube/btfs/'+hashVideo+'" poster="https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash+'" controls></video><br />'
         html += '<h1>'+video.json.title+'</h1>'
         html += '<h2>Author: '+video.author+'</h2>'
         html += '<p><strong>Description: </strong>'+video.json.description.replace(/(?:\r\n|\r|\n)/g, '<br />')+'</p>'
         
         var url = rootDomain+'/#!/v/'+author+'/'+permlink
-        var snap = 'https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash
-        var urlVideo = 'https://player.d.tube/btfs/'+hashVideo
+        var snap = null
+        if (video.json.ipfs && video.json.ipfs.snaphash)
+            snap = 'https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash
+        if (video.json.thumbnailUrl)
+            snap = video.json.thumbnailUrl
+        
+        var urlVideo = null
+        if (hashVideo) 
+            urlVideo = 'https://player.d.tube/btfs/'+hashVideo
         var embedUrl = 'https://emb.d.tube/#!/'+author+'/'+permlink+'/true'
         var duration = video.json.duration || null
+        
         var description = video.json.description.replace(/(?:\r\n|\r|\n)/g, ' ').substr(0, 300)
         cb(null, html, video.json.title, description, url, snap, urlVideo, duration, embedUrl)
     })
@@ -170,21 +183,33 @@ function getVideoHTML(author, permlink, cb) {
             return
         }
         var video = parseVideo(result.content[author+'/'+permlink])
-        var hashVideo = video.json.ipfs.videohash
-        if (video.json.ipfs.video240hash) hashVideo = video.json.ipfs.video240hash
-        if (video.json.ipfs.video480hash) hashVideo = video.json.ipfs.video480hash
+
+        if (video.json.ipfs) {
+            var hashVideo = video.json.ipfs.videohash
+            if (video.json.ipfs.video240hash) hashVideo = video.json.ipfs.video240hash
+            if (video.json.ipfs.video480hash) hashVideo = video.json.ipfs.video480hash
+        }
 
         var html = ''
-        html += '<video src="https://player.d.tube/btfs/'+hashVideo+'" poster="https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash+'" controls></video><br />'
+        if (hashVideo)
+            html += '<video src="https://player.d.tube/btfs/'+hashVideo+'" poster="https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash+'" controls></video><br />'
         html += '<h1>'+video.json.title+'</h1>'
         html += '<h2>Author: '+video.author+'</h2>'
         html += '<p><strong>Description: </strong>'+video.json.description.replace(/(?:\r\n|\r|\n)/g, '<br />')+'</p>'
         
         var url = rootDomain+'/#!/v/'+author+'/'+permlink
-        var snap = 'https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash
-        var urlVideo = 'https://player.d.tube/btfs/'+hashVideo
+        var snap = null
+        if (video.json.ipfs && video.json.ipfs.snaphash)
+            snap = 'https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash
+        if (video.json.thumbnailUrl)
+            snap = video.json.thumbnailUrl
+        
+        var urlVideo = null
+        if (hashVideo) 
+            urlVideo = 'https://player.d.tube/btfs/'+hashVideo
         var embedUrl = 'https://emb.d.tube/#!/'+author+'/'+permlink+'/true'
         var duration = video.json.duration || null
+        
         var description = video.json.description.replace(/(?:\r\n|\r|\n)/g, ' ').substr(0, 300)
         cb(null, html, video.json.title, description, url, snap, urlVideo, duration, embedUrl)
     })

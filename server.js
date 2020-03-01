@@ -12,7 +12,7 @@ const file = 'robots.json'
 const crawlers = jsonfile.readFileSync(file)
 const rootDomain = 'https://d.tube'
 
-const lightrpc = createClient('https://anyx.io');
+const lightrpc = createClient('https://api.steemit.com');
 const javalon = require('javalon')
 
 let layouts = {}

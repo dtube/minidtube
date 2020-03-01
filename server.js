@@ -208,9 +208,11 @@ function handleChainData(author, permlink, video, cb) {
 
 }
 function getVideoHTML(author, permlink, cb) {
+    var hasReplied = false
     var steemDone = false
     var avalonDone = false
     javalon.getContent(author, permlink, function(err, video) {
+        if (hasReplied) return
         avalonDone = true
         if (err) {
             if (steemDone && cb)
@@ -218,8 +220,10 @@ function getVideoHTML(author, permlink, cb) {
             return
         }
         handleChainData(author, permlink, video, cb)
+        hasReplied = true
     })
     lightrpc.send('get_state', [`/dtube/@${author}/${permlink}`], function(err, result) {
+        if (hasReplied) return
         steemDone = true
         if (err) {
             if (avalonDone && cb)
@@ -233,6 +237,7 @@ function getVideoHTML(author, permlink, cb) {
         }
         var video = parseVideo(result.content[author+'/'+permlink])
         handleChainData(author, permlink, video, cb)
+        hasReplied = true
     })
 }
 

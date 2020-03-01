@@ -49,8 +49,10 @@ initHeadless(function(page) {
         // Robots
         // Served data for robots
         if (reqPath == '/robots.txt') {
-            res.set('Content-Type', 'text/plain')
-            res.send(`User-agent: *\nDisallow: /DTube_files/`)
+            getRobotsTxt(function(err, data) {
+                if (error(err, next)) return
+                res.send(data)
+            })
         } else if (reqPath.startsWith('/v/')) {
             // video page
             getVideoHTML(
@@ -174,6 +176,19 @@ function getHumanHTML(cb) {
         });
     }
 }
+
+function getRobotsTxt(cb) {
+    fs.readFile(path.join(__dirname,"static","production","robots.txt"), 'utf8', function (err,data) {
+        if (err) {
+            cb(err)
+            return
+        } else {
+            cb(null, data)
+            return
+        }
+    });
+}
+
 function handleChainData(author, permlink, video, cb) {
     if (video.json.ipfs) {
         var hashVideo = video.json.ipfs.videohash

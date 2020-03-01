@@ -15,37 +15,40 @@ const rootDomain = 'https://d.tube'
 const lightrpc = createClient('https://api.steemit.com');
 const javalon = require('javalon')
 
+let layouts = {}
+
 const puppeteer = require('puppeteer');
 let isPuppeteering = false
 let cacheTimeout = 1000*60*30
 let cache = {}
 
-let layouts = {}
-
-app.use('/DTube_files', express.static(path.join(__dirname, 'static/production/DTube_files')))
-app.use('/favicon.ico', express.static(path.join(__dirname, 'static/production/DTube_files/images/dtubefavicon.png')))
-app.get('*', function(req, res, next) {
-    var isRobot = getRobotName(req.headers['user-agent'])
-
-    // parsing the query
-    var reqPath = null
-    if (req.query._escaped_fragment_ && req.query._escaped_fragment_.length > 0)
-        reqPath = req.query._escaped_fragment_
-    else
-        reqPath = req.path
-
-    if (reqPath.startsWith('/sockjs/info')) {
-        res.send('{}')
-        return;
-    }
-
-    if (isRobot)
-        console.log(isRobot, 'GET', req.path, req.query)
+initHeadless(function(page) {
+    app.use('/DTube_files', express.static(path.join(__dirname, 'static/production/DTube_files')))
+    app.use('/favicon.ico', express.static(path.join(__dirname, 'static/production/DTube_files/images/dtubefavicon.png')))
+    app.get('*', function(req, res, next) {
+        var isRobot = getRobotName(req.headers['user-agent'])
     
-    // isRobot = true
-    if (isRobot) {
+        // parsing the query
+        var reqPath = null
+        if (req.query._escaped_fragment_ && req.query._escaped_fragment_.length > 0)
+            reqPath = req.query._escaped_fragment_
+        else
+            reqPath = req.path
+    
+        if (reqPath.startsWith('/sockjs/info')) {
+            res.send('{}')
+            return;
+        }
+    
+        if (isRobot)
+            console.log(isRobot, 'GET', req.path, req.query)
+        
+        if (!isRobot) return human(reqPath, res, next)
+    
+        // Robots
+        // Served data for robots
         if (reqPath.startsWith('/v/')) {
-            // DIRTY ROBOTS
+            // video page
             getVideoHTML(
             reqPath.split('/')[2],
             reqPath.split('/')[3],
@@ -74,6 +77,7 @@ app.get('*', function(req, res, next) {
                 })
             })
         } else {
+            // beta pre-rendering for all other pages
             if (cache[reqPath] && new Date().getTime() - cache[reqPath].ts < cacheTimeout)
                 res.send(cache[reqPath].data)
             else {
@@ -82,34 +86,35 @@ app.get('*', function(req, res, next) {
                 else {
                     isPuppeteering = true;
                     (async () => {
-                        const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
-                        const page = await browser.newPage();
                         let url = 'https://d.tube/#!'+reqPath
                         var date = new Date().getTime()
-                        await page.goto(url, {waitUntil: 'networkidle2'});
+                        await page.goto(url, {waitUntil: 'networkidle0'});
+                        await page.waitFor(1000);
                         // await page.waitForSelector('#snapload');
-                        console.log((new Date().getTime() - date)+'ms for '+url)
                         let content = await page.content()
+                        content = content.replace(/\.\/DTube_files\//g, "/DTube_files/")
+                        content = content.replace(/\/DTube_files\/[0-9a-fA-F]+.js/, "https://google.com/notforrobots.js")
+                        var took = (new Date().getTime() - date)
+                        console.log(took/1000+' sec for '+url)
                         cache[reqPath] = {
                             data: content,
                             ts: new Date().getTime()
                         }
                         res.send(content)
-                        await browser.close();
                         isPuppeteering = false;
                     })();
                 }
             }
         }
-    } else
-        human(reqPath, res, next)
+    })
+    
+    app.listen(port, () => console.log('minidtube listening on port '+port))    
 })
 
-app.listen(port, () => console.log('minidtube listening on port '+port))
 
 function human(reqPath, res, next) {
-    // HUMAN BROWSER
-    // AND DISALLOWED ROBOTS
+    // Human User
+    // Serving static app and letting the real browser handle the rest
     if (reqPath == '/') {
         getHumanHTML(function(err, humanHTML) {
             if (error(err, next)) return
@@ -259,4 +264,12 @@ function getRobotName(userAgent) {
         if (isRobot) return crawlers[i].pattern;
     }
     return;
+}
+
+function initHeadless(cb) {
+    puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']}).then((browser) => {
+        browser.newPage().then((page) => {
+            cb(page)
+        })
+    });
 }

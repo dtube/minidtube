@@ -14,7 +14,6 @@ const rootDomain = 'https://d.tube'
 
 const lightrpc = createClient('https://api.steemit.com');
 const javalon = require('javalon')
-const puppeteer = require('puppeteer');
 
 let layouts = {}
 
@@ -39,50 +38,35 @@ app.get('*', function(req, res, next) {
         console.log(isRobot, 'GET', req.path, req.query)
     
     // isRobot = true
-    if (isRobot) {
-        if (reqPath.startsWith('/v/')) {
-            // DIRTY ROBOTS
-            getVideoHTML(
-            reqPath.split('/')[2],
-            reqPath.split('/')[3],
-            function(err, contentHTML, pageTitle, description, url, snap, urlvideo, duration, embedUrl) {
+    if (isRobot && reqPath.startsWith('/v/')) {
+        // DIRTY ROBOTS
+        getVideoHTML(
+        reqPath.split('/')[2],
+        reqPath.split('/')[3],
+        function(err, contentHTML, pageTitle, description, url, snap, urlvideo, duration, embedUrl) {
+            if (error(err, next)) return
+            getRobotHTML(function(err, baseHTML) {
                 if (error(err, next)) return
-                getRobotHTML(function(err, baseHTML) {
-                    if (error(err, next)) return
-                    baseHTML = baseHTML.replace(/@@CONTENT@@/g, contentHTML)
-                    baseHTML = baseHTML.replace(/@@TITLE@@/g, htmlEncode(pageTitle))
-                    baseHTML = baseHTML.replace(/@@DESCRIPTION@@/g, htmlEncode(description))
-                    baseHTML = baseHTML.replace(/@@URL@@/g, htmlEncode(url))
-                    baseHTML = baseHTML.replace(/@@URLNOHASH@@/g, htmlEncode(url).replace('/#!',''))
-                    // facebook minimum snap is 200x200 otherwise useless
-                    baseHTML = baseHTML.replace(/@@SNAP@@/g, htmlEncode(snap))
-                    baseHTML = baseHTML.replace(/@@VIDEO@@/g, htmlEncode(urlvideo))
-                    baseHTML = baseHTML.replace(/@@EMBEDURL@@/g, htmlEncode(embedUrl))
-                    if (duration) {
-                        var durationHTML = '<meta property="og:video:duration" content="@@VIDEODURATION@@" />'
-                        durationHTML = durationHTML.replace(/@@VIDEODURATION@@/g, htmlEncode(""+Math.round(duration)))
-                        baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, durationHTML)
-                    } else {
-                        baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, '')
-                    }
-                    
-                    res.send(baseHTML)
-                })
+                baseHTML = baseHTML.replace(/@@CONTENT@@/g, contentHTML)
+                baseHTML = baseHTML.replace(/@@TITLE@@/g, htmlEncode(pageTitle))
+                baseHTML = baseHTML.replace(/@@DESCRIPTION@@/g, htmlEncode(description))
+                baseHTML = baseHTML.replace(/@@URL@@/g, htmlEncode(url))
+                baseHTML = baseHTML.replace(/@@URLNOHASH@@/g, htmlEncode(url).replace('/#!',''))
+                // facebook minimum snap is 200x200 otherwise useless
+                baseHTML = baseHTML.replace(/@@SNAP@@/g, htmlEncode(snap))
+                baseHTML = baseHTML.replace(/@@VIDEO@@/g, htmlEncode(urlvideo))
+                baseHTML = baseHTML.replace(/@@EMBEDURL@@/g, htmlEncode(embedUrl))
+                if (duration) {
+                    var durationHTML = '<meta property="og:video:duration" content="@@VIDEODURATION@@" />'
+                    durationHTML = durationHTML.replace(/@@VIDEODURATION@@/g, htmlEncode(""+Math.round(duration)))
+                    baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, durationHTML)
+                } else {
+                    baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, '')
+                }
+                
+                res.send(baseHTML)
             })
-        } else {
-            (async () => {
-                const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
-                const page = await browser.newPage();
-                let url = 'https://d.tube/#!'+reqPath
-                var date = new Date().getTime()
-                await page.goto(url, {waitUntil: 'networkidle2'});
-                // await page.waitForSelector('#snapload');
-                console.log((new Date().getTime() - date))+'ms for '+url
-                let content = await page.content()
-                res.send(content)
-                await browser.close();
-            })();
-        }
+        })
     } else {
         // HUMAN BROWSER
         // AND DISALLOWED ROBOTS

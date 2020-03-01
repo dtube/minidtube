@@ -49,9 +49,9 @@ initHeadless(function(page) {
         // Robots
         // Served data for robots
         if (reqPath == '/robots.txt') {
+            res.set('Content-Type', 'text/plain')
             res.send(`User-agent: *\nDisallow: /DTube_files/`)
-        }
-        else if (reqPath.startsWith('/v/')) {
+        } else if (reqPath.startsWith('/v/')) {
             // video page
             getVideoHTML(
             reqPath.split('/')[2],

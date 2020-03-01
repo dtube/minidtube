@@ -12,17 +12,41 @@ const file = 'robots.json'
 const crawlers = jsonfile.readFileSync(file)
 const rootDomain = 'https://d.tube'
 
-const lightrpc = createClient('https://api.steemit.com');
+const lightrpc = createClient('https://anyx.io');
 const javalon = require('javalon')
 
 let layouts = {}
 
 const puppeteer = require('puppeteer');
+let browser = null
+let page = null
+let isOpeningTab = true
 let isPuppeteering = false
+let puppetReloadTime = 1000*60*15
+let cacheCleanInterval = 1000*30
 let cacheTimeout = 1000*60*30
 let cache = {}
 
-initHeadless(function(page) {
+var date = new Date().getTime()
+initBrowser(function() {
+    resetBrowserTab(function() {
+        initHttp(function() {
+            // resetting the browser tab every 10 minutes
+            setInterval(function() {
+                resetBrowserTab(function() {})
+            }, puppetReloadTime)
+
+            setInterval(function() {
+                cleanCache()
+            }, cacheCleanInterval)
+
+            var took = (new Date().getTime() - date)/1000
+            console.log('Startup took '+took+' sec')
+        })
+    })
+})
+
+function initHttp(cb) {
     app.use('/DTube_files', express.static(path.join(__dirname, 'static/production/DTube_files')))
     app.use('/favicon.ico', express.static(path.join(__dirname, 'static/production/DTube_files/images/dtubefavicon.png')))
     app.get('*', function(req, res, next) {
@@ -52,6 +76,7 @@ initHeadless(function(page) {
             res.set('Content-Type', 'text/plain')
             res.send(`User-agent: *\nDisallow:`)
         } else if (reqPath.startsWith('/v/')) {
+            var date = new Date().getTime()
             // video page
             getVideoHTML(
             reqPath.split('/')[2],
@@ -76,7 +101,8 @@ initHeadless(function(page) {
                     } else {
                         baseHTML = baseHTML.replace(/@@METAVIDEODURATION@@/g, '')
                     }
-                    
+                    var took = (new Date().getTime() - date)
+                    console.log(took/1000+' sec for generating '+reqPath)
                     res.send(baseHTML)
                 })
             })
@@ -85,35 +111,55 @@ initHeadless(function(page) {
             if (cache[reqPath] && new Date().getTime() - cache[reqPath].ts < cacheTimeout)
                 res.send(cache[reqPath].data)
             else {
-                if (isPuppeteering)
+                // console.log(isPuppeteering, isOpeningTab)
+                if (isPuppeteering || isOpeningTab)
                     human(reqPath, res, next)
                 else {
                     isPuppeteering = true;
                     (async () => {
-                        let url = 'https://d.tube/#!'+reqPath
-                        var date = new Date().getTime()
-                        await page.goto(url, {waitUntil: 'networkidle0'});
-                        await page.waitFor(1000);
-                        // await page.waitForSelector('#snapload');
-                        let content = await page.content()
-                        content = content.replace(/\.\/DTube_files\//g, "/DTube_files/")
-                        content = content.replace(/\/DTube_files\/[0-9a-fA-F]+.js/, "https://google.com/notforrobots.js")
-                        var took = (new Date().getTime() - date)
-                        console.log(took/1000+' sec for '+url)
-                        cache[reqPath] = {
-                            data: content,
-                            ts: new Date().getTime()
+                        try {
+                            let url = 'http://localhost:'+port+'/#!'+reqPath
+                            var date = new Date().getTime()
+                            await page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36');                            
+                            await page.goto(url, {waitUntil: 'networkidle0'});
+                            try {
+                                await page.waitForSelector('#snapload', {
+                                    timeout: 1000
+                                });
+                            } catch (error) {
+                            }
+                            
+                            let content = await page.content()
+                            content = content.replace(/\.\/DTube_files\//g, "/DTube_files/")
+                            content = content.replace(/\/DTube_files\/[0-9a-fA-F]+.js/, "https://google.com/notforrobots.js")
+                            var took = (new Date().getTime() - date)
+                            console.log(took/1000+' sec for rendering '+reqPath)
+                            // console.log(page.target()._targetInfo)
+                            cache[reqPath] = {
+                                data: content,
+                                ts: new Date().getTime()
+                            }
+                            res.send(content)
+                            isPuppeteering = false;
+                        } catch (error) {
+                            console.log(error)
+                            isPuppeteering = false;
+                            human(reqPath, res, next)
                         }
-                        res.send(content)
-                        isPuppeteering = false;
                     })();
                 }
             }
         }
     })
     
-    app.listen(port, () => console.log('minidtube listening on port '+port))    
-})
+    var date = new Date().getTime()
+    app.listen(port, () => console.log('minidtube listening on port '+port), null, function() {
+        var took = (new Date().getTime() - date)/1000
+        console.log('Express.js port '+port+' started in '+took+' sec')
+        cb()
+    })
+    
+}
 
 
 function human(reqPath, res, next) {
@@ -275,10 +321,49 @@ function getRobotName(userAgent) {
     return;
 }
 
-function initHeadless(cb) {
-    puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']}).then((browser) => {
-        browser.newPage().then((page) => {
-            cb(page)
-        })
+function initBrowser(cb) {
+    var date = new Date().getTime()
+    puppeteer.launch({
+        headerless: 'true',
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    }).then((newBrowser) => {
+        browser = newBrowser
+        var took = (new Date().getTime() - date)/1000
+        console.log('Browser started in '+took+' sec')
+        cb()
     });
+}
+
+function resetBrowserTab(cb) {
+    var date = new Date().getTime()
+    isOpeningTab = true
+    browser.newPage().then((newPage) => {
+        if (page) {
+            page.close().then(function() {
+                page = newPage
+                isOpeningTab = false
+                var took = (new Date().getTime() - date)/1000
+                console.log('Browser tab reset in '+took+' sec')
+                cb()
+            })
+        } else {
+            page = newPage
+            isOpeningTab = false
+            var took = (new Date().getTime() - date)/1000
+            console.log('Browser tab reset in '+took+' sec')
+            cb()
+        }
+    })
+}
+
+function cleanCache() {
+    var date = new Date().getTime()
+    var before = Object.keys(cache).length
+    for (const path in cache) {
+        var date = new Date().getTime()
+        if (date - cache[path].ts > cacheTimeout)
+            delete cache[path]
+    }
+    var took = (new Date().getTime() - date)/1000
+    console.log('Cache '+before+' -> '+Object.keys(cache).length+' in '+took+' sec')
 }

@@ -26,6 +26,7 @@ initHeadless(function(page) {
     app.use('/DTube_files', express.static(path.join(__dirname, 'static/production/DTube_files')))
     app.use('/favicon.ico', express.static(path.join(__dirname, 'static/production/DTube_files/images/dtubefavicon.png')))
     app.get('*', function(req, res, next) {
+        // this is based on this list: https://github.com/monperrus/crawler-user-agents/blob/master/crawler-user-agents.json
         var isRobot = getRobotName(req.headers['user-agent'])
     
         // parsing the query

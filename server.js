@@ -256,10 +256,10 @@ function handleChainData(author, permlink, video, cb) {
         snap = 'https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash
     if (video.json.thumbnailUrl)
         snap = video.json.thumbnailUrl
-    if (video.json.files.ipfs.img['360']) {
+    if (video.json.files && video.json.files.ipfs && video.json.files.ipfs.img['360']) {
         snap = snap = 'https://snap1.d.tube/ipfs/'+video.json.files.ipfs.img['360']
         snapDimensions = "640x360"
-    } else if (video.json.files.ipfs.img['118'])
+    } else if (video.json.files && video.json.files.ipfs && video.json.files.ipfs.img['118'])
         snap = snap = 'https://snap1.d.tube/ipfs/'+video.json.files.ipfs.img['118']
     
     var urlVideo = null

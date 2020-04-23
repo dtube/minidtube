@@ -261,6 +261,11 @@ function handleChainData(author, permlink, video, cb) {
         snapDimensions = "640x360"
     } else if (video.json.files && video.json.files.ipfs && video.json.files.ipfs.img['118'])
         snap = snap = 'https://snap1.d.tube/ipfs/'+video.json.files.ipfs.img['118']
+
+    if (!snap && video.json.files && video.json.files.youtube) {
+        snap = 'https://i.ytimg.com/vi/'+video.json.files.youtube+'/hqdefault.jpg'
+        snapDimensions = "640x360"
+    }
     
     var urlVideo = null
     if (hashVideo) 

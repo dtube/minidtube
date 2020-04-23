@@ -81,7 +81,7 @@ function initHttp(cb) {
             getVideoHTML(
             reqPath.split('/')[2],
             reqPath.split('/')[3],
-            function(err, contentHTML, pageTitle, description, url, snap, urlvideo, duration, embedUrl) {
+            function(err, contentHTML, pageTitle, description, url, snap, urlvideo, duration, embedUrl, author, permlink, snapDimensions) {
                 if (error(err, next)) return
                 getRobotHTML(function(err, baseHTML) {
                     if (error(err, next)) return
@@ -94,6 +94,11 @@ function initHttp(cb) {
                     baseHTML = baseHTML.replace(/@@SNAP@@/g, htmlEncode(snap))
                     baseHTML = baseHTML.replace(/@@VIDEO@@/g, htmlEncode(urlvideo))
                     baseHTML = baseHTML.replace(/@@EMBEDURL@@/g, htmlEncode(embedUrl))
+                    baseHTML = baseHTML.replace(/@@AUTHOR@@/g, htmlEncode(author))
+                    baseHTML = baseHTML.replace(/@@PERMLINK@@/g, htmlEncode(permlink))
+                    snapDimensions = snapDimensions.split('x')
+                    baseHTML = baseHTML.replace(/@@SNAPW@@/g, htmlEncode(snapDimensions[0]))
+                    baseHTML = baseHTML.replace(/@@SNAPH@@/g, htmlEncode(snapDimensions[1]))
                     if (duration) {
                         var durationHTML = '<meta property="og:video:duration" content="@@VIDEODURATION@@" />'
                         durationHTML = durationHTML.replace(/@@VIDEODURATION@@/g, htmlEncode(""+Math.round(duration)))
@@ -236,25 +241,39 @@ function handleChainData(author, permlink, video, cb) {
     var description = null
     if (video.json.description)
         description = video.json.description
+    else if (video.json.desc)
+        description = video.json.desc
     else if (video.json.content && video.json.content.description)
         description = video.json.content.description
+
     if (description)
         html += '<p><strong>Description: </strong>'+description.replace(/(?:\r\n|\r|\n)/g, '<br />')+'</p>'
 
     var url = rootDomain+'/#!/v/'+author+'/'+permlink
     var snap = null
+    var snapDimensions = "210x118"
     if (video.json.ipfs && video.json.ipfs.snaphash)
         snap = 'https://snap1.d.tube/ipfs/'+video.json.ipfs.snaphash
     if (video.json.thumbnailUrl)
         snap = video.json.thumbnailUrl
+    if (video.json.files.ipfs.img['360']) {
+        snap = snap = 'https://snap1.d.tube/ipfs/'+video.json.files.ipfs.img['360']
+        snapDimensions = "640x360"
+    } else if (video.json.files.ipfs.img['118'])
+        snap = snap = 'https://snap1.d.tube/ipfs/'+video.json.files.ipfs.img['118']
     
     var urlVideo = null
     if (hashVideo) 
         urlVideo = 'https://player.d.tube/btfs/'+hashVideo
     var embedUrl = 'https://emb.d.tube/#!/'+author+'/'+permlink+'/true'
     var duration = video.json.duration || null
+
+    var author = video.author
+    var link = video.link
+    if (!link && video.permlink)
+        link = video.link
     
-    cb(null, html, title, description, url, snap, urlVideo, duration, embedUrl)
+    cb(null, html, title, description, url, snap, urlVideo, duration, embedUrl, author, link, snapDimensions)
 
 }
 function getVideoHTML(author, permlink, cb) {
